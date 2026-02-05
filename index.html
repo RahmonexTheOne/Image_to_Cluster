@@ -3,201 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Documentation : From Image to Cluster</title>
+    <title>DevOps Pipeline : Image to Cluster</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary: #2563eb;
-            --secondary: #0f172a;
-            --accent: #38bdf8;
-            --bg: #f8fafc;
-            --text: #1e293b;
+            --primary: #4e46e5; --secondary: #1e293b; --accent: #06b6d4;
+            --bg: #0f172a; --card-bg: #1e293b; --text: #f1f5f9;
         }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; scroll-behavior: smooth; }
+        
+        /* Hero Section */
+        .hero { background: linear-gradient(135deg, #4e46e5 0%, #06b6d4 100%); padding: 60px 20px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .hero h1 { font-size: 2.5rem; margin: 0; letter-spacing: -1px; }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: var(--text);
-            background-color: var(--bg);
-            margin: 0;
-            padding: 0;
-        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
 
-        header {
-            background: linear-gradient(135deg, var(--secondary), var(--primary));
-            color: white;
-            padding: 4rem 2rem;
-            text-align: center;
-            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
-        }
+        /* Animated Pipeline Schema */
+        .pipeline { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 40px; border-radius: 20px; margin-bottom: 50px; position: relative; border: 1px solid #334155; }
+        .step { text-align: center; flex: 1; z-index: 2; }
+        .step img { width: 80px; height: 80px; object-fit: contain; margin-bottom: 15px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.2)); transition: 0.3s; }
+        .step:hover img { transform: translateY(-10px) scale(1.1); }
+        
+        .connector { position: absolute; top: 50%; height: 4px; background: #334155; z-index: 1; overflow: hidden; }
+        .connector-1 { left: 20%; width: 25%; }
+        .connector-2 { left: 55%; width: 25%; }
+        .progress-line { position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: var(--accent); animation: pulse 3s infinite; }
+        @keyframes pulse { 0% { left: -100%; } 100% { left: 100%; } }
 
-        .container {
-            max-width: 1000px;
-            margin: -50px auto 50px;
-            padding: 2rem;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-
-        h2 { border-left: 5px solid var(--primary); padding-left: 1rem; color: var(--secondary); margin-top: 2.5rem; }
-
-        /* --- SCHÉMA ANIMÉ --- */
-        .canvas-container {
-            width: 100%;
-            height: 300px;
-            background: #111827;
-            border-radius: 8px;
-            margin: 2rem 0;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-        }
-
-        .node {
-            width: 120px;
-            padding: 10px;
-            background: rgba(255,255,255,0.1);
-            border: 2px solid var(--accent);
-            border-radius: 8px;
-            color: white;
-            text-align: center;
-            z-index: 2;
-            transition: transform 0.3s;
-        }
-
-        .node:hover { transform: scale(1.1); background: rgba(56, 189, 248, 0.2); }
-
-        .line {
-            position: absolute;
-            height: 2px;
-            background: linear-gradient(90deg, var(--accent), transparent);
-            width: 100px;
-            z-index: 1;
-        }
-
-        .particle {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background: var(--accent);
-            border-radius: 50%;
-            filter: blur(2px);
-            animation: flow 3s infinite linear;
-        }
-
-        @keyframes flow {
-            0% { left: 15%; opacity: 0; }
-            50% { opacity: 1; }
-            100% { left: 85%; opacity: 0; }
-        }
-
-        /* --- CODE & COMMANDS --- */
-        code {
-            background: #e2e8f0;
-            padding: 0.2rem 0.4rem;
-            border-radius: 4px;
-            font-family: 'Courier New', Courier, monospace;
-        }
-
-        pre {
-            background: #1e293b;
-            color: #f1f5f9;
-            padding: 1.5rem;
-            border-radius: 8px;
-            overflow-x: auto;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.8rem;
-            background: var(--primary);
-            color: white;
-            margin-bottom: 1rem;
-        }
+        /* Content Blocks */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .card { background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid #334155; }
+        .card h3 { color: var(--accent); margin-top: 0; display: flex; align-items: center; gap: 10px; }
+        
+        pre { background: #000; padding: 15px; border-radius: 8px; font-size: 0.9rem; color: #10b981; overflow-x: auto; border: 1px solid #1e293b; }
+        .highlight { color: var(--accent); font-weight: bold; }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-<header>
-    <h1><i class="fas fa-cubes"></i> Atelier : From Image to Cluster</h1>
-    <p>Industrialisation du cycle de vie applicatif avec Packer, Ansible et K3d</p>
-</header>
-
-<div class="container">
-    <div class="badge">Séquence 4 : Documentation Finale</div>
-    
-    <p>Bienvenue dans la documentation de mon infrastructure. Ce projet démontre comment automatiser la création d'un artefact immuable (Docker) et son orchestration sur une plateforme Kubernetes moderne.</p>
-
-    <h2>1. Architecture du Flux</h2>
-    <div class="canvas-container" id="schema">
-        <div class="node"><i class="fas fa-file-code"></i><br>Packer Build</div>
-        <div class="particle" style="top: 50%; animation-delay: 0s;"></div>
-        <div class="particle" style="top: 50%; animation-delay: 1s;"></div>
-        <div class="node"><i class="fas fa-box"></i><br>Ansible Config</div>
-        <div class="particle" style="top: 50%; animation-delay: 0.5s;"></div>
-        <div class="node"><i class="fas fa-server"></i><br>K3d Cluster</div>
-    </div>
-
-    <h2>2. Processus Technique</h2>
-    <h3>A. Build Immuable (Packer)</h3>
-    <p>Plutôt que de configurer un serveur à la main, nous utilisons <strong>Packer</strong> pour créer une image Docker "prête à l'emploi". On injecte notre <code>index.html</code> directement dans le moule de l'image Nginx.</p>
-    <pre>packer build image.pkr.hcl</pre>
-
-    <h3>B. Orchestration (Ansible)</h3>
-    <p><strong>Ansible</strong> agit ici comme le pilote. Il communique avec l'API Kubernetes pour déclarer l'état souhaité :
-    <ul>
-        <li><strong>Deployment</strong> : Assure que 2 réplicas de notre application tournent en permanence.</li>
-        <li><strong>Service</strong> : Expose l'application via un NodePort pour la rendre accessible.</li>
-    </ul>
-    </p>
-
-    <h2>3. Défis Techniques & Solutions</h2>
-    <blockquote>
-        <strong>Problème rencontré :</strong> Lors de l'exécution d'Ansible, le système Ubuntu bloquait l'installation de la librairie <code>kubernetes</code> (PEP 668).<br>
-        <strong>Solution :</strong> Utilisation du flag <code>--break-system-packages</code> pour forcer l'installation dans l'environnement GitHub Codespaces, permettant à Ansible d'utiliser l'interprète Python système.
-    </blockquote>
-
-    <h2>4. Guide d'utilisation rapide</h2>
-    <p>Pour reproduire ce déploiement, utilisez le <strong>Makefile</strong> inclus :</p>
-    <pre>
-# 1. Préparer l'environnement et le cluster
-make setup
-
-# 2. Builder et importer l'image
-make build
-
-# 3. Déployer sur Kubernetes
-make deploy</pre>
-
-    <footer style="margin-top: 4rem; text-align: center; font-size: 0.9rem; color: #64748b;">
-        <hr>
-        Projet réalisé par <strong>@RahmonexTheOne</strong> dans le cadre de l'atelier DevOps 2026.
-    </footer>
+<div class="hero">
+    <h1><i class="fas fa-rocket"></i> FROM IMAGE TO CLUSTER</h1>
+    <p>Industrialisation & Orchestration Continue</p>
 </div>
 
-<script>
-    // Animation subtile au scroll
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = 1;
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    });
+<div class="container">
+    <section class="card" style="margin-bottom: 40px;">
+        <h3><i class="fas fa-info-circle"></i> Concept de l'Atelier</h3>
+        <p>Cet atelier simule une chaîne de production réelle. L'enjeu est de passer d'un <b>code source</b> (HTML) à un <b>service haute disponibilité</b> sur Kubernetes sans aucune configuration manuelle "ad-hoc".</p>
+        <p>Nous utilisons la philosophie de l'<b>Infrastructure as Code (IaC)</b> et de l'<b>Immutabilité</b> : on ne modifie jamais un serveur en production, on reconstruit une nouvelle image et on la déploie.</p>
+    </section>
 
-    document.querySelectorAll('h2, .node').forEach(el => {
-        el.style.opacity = 0;
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'all 0.6s ease-out';
-        observer.observe(el);
-    });
-</script>
+    <div class="pipeline">
+        <div class="connector connector-1"><div class="progress-line"></div></div>
+        <div class="connector connector-2"><div class="progress-line" style="animation-delay: 1.5s;"></div></div>
+        
+        <div class="step">
+            <img src="https://cdn.worldvectorlogo.com/logos/packer.svg" alt="Packer" onerror="this.src='https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/packer.svg'">            <h4>1. Build Artifact</h4>
+            <small>Packer crée l'image Docker</small>
+        </div>
+        <div class="step">
+            <img src="https://www.vectorlogo.zone/logos/ansible/ansible-icon.svg" alt="Ansible">
+            <h4>2. Orchestration</h4>
+            <small>Ansible gère les objets K8s</small>
+        </div>
+        <div class="step">
+            <img src="https://www.vectorlogo.zone/logos/kubernetes/kubernetes-icon.svg" alt="K3d">
+            <h4>3. Execution</h4>
+            <small>Cluster K3d Haute Dispo</small>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <h3><i class="fas fa-tools"></i> Automatisation des Dépendances</h3>
+            <p>Le plus gros défi est la gestion de l'environnement GitHub Codespaces (Ubuntu 24.04). Nous automatisons l'installation via le <span class="highlight">Makefile</span> :</p>
+            <ul>
+                <li>Nettoyage des sources APT (Yarn error fix).</li>
+                <li>Installation forcée de <code>kubernetes-python</code> via <code>--break-system-packages</code> pour lier Ansible à l'OS.</li>
+                <li>Installation des binaires Packer et K3d.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3><i class="fas fa-code-branch"></i> Le Pipeline technique</h3>
+            <pre>
+# Build Packer
+# Injecte index.html -> Nginx
+packer build image.pkr.hcl
+
+# Injection K3d
+# Transfert l'image vers les nodes
+k3d image import custom-nginx -c lab
+
+# Run Ansible
+# Applique le Deployment & Service
+ansible-playbook deploy.yml</pre>
+        </div>
+    </div>
+
+    <section class="card" style="margin-top: 40px; border-left: 5px solid #10b981;">
+        <h3><i class="fas fa-magic"></i> Automatisation Totale : Le "Master Script"</h3>
+        <p>Pour ne plus jamais taper les commandes une par une, nous avons centralisé l'intelligence dans un script de déploiement automatique.</p>
+        <pre>
+# Pour tout lancer d'un coup :
+chmod +x deploy.sh && ./deploy.sh
+        </pre>
+    </section>
+</div>
 
 </body>
 </html>
