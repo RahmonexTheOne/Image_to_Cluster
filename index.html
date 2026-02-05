@@ -1,1 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation : From Image to Cluster</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #0f172a;
+            --accent: #38bdf8;
+            --bg: #f8fafc;
+            --text: #1e293b;
+        }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: -50px auto 50px;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        h2 { border-left: 5px solid var(--primary); padding-left: 1rem; color: var(--secondary); margin-top: 2.5rem; }
+
+        /* --- SCHÉMA ANIMÉ --- */
+        .canvas-container {
+            width: 100%;
+            height: 300px;
+            background: #111827;
+            border-radius: 8px;
+            margin: 2rem 0;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .node {
+            width: 120px;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+            z-index: 2;
+            transition: transform 0.3s;
+        }
+
+        .node:hover { transform: scale(1.1); background: rgba(56, 189, 248, 0.2); }
+
+        .line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), transparent);
+            width: 100px;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            filter: blur(2px);
+            animation: flow 3s infinite linear;
+        }
+
+        @keyframes flow {
+            0% { left: 15%; opacity: 0; }
+            50% { opacity: 1; }
+            100% { left: 85%; opacity: 0; }
+        }
+
+        /* --- CODE & COMMANDS --- */
+        code {
+            background: #e2e8f0;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        pre {
+            background: #1e293b;
+            color: #f1f5f9;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            background: var(--primary);
+            color: white;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1><i class="fas fa-cubes"></i> Atelier : From Image to Cluster</h1>
+    <p>Industrialisation du cycle de vie applicatif avec Packer, Ansible et K3d</p>
+</header>
+
+<div class="container">
+    <div class="badge">Séquence 4 : Documentation Finale</div>
+    
+    <p>Bienvenue dans la documentation de mon infrastructure. Ce projet démontre comment automatiser la création d'un artefact immuable (Docker) et son orchestration sur une plateforme Kubernetes moderne.</p>
+
+    <h2>1. Architecture du Flux</h2>
+    <div class="canvas-container" id="schema">
+        <div class="node"><i class="fas fa-file-code"></i><br>Packer Build</div>
+        <div class="particle" style="top: 50%; animation-delay: 0s;"></div>
+        <div class="particle" style="top: 50%; animation-delay: 1s;"></div>
+        <div class="node"><i class="fas fa-box"></i><br>Ansible Config</div>
+        <div class="particle" style="top: 50%; animation-delay: 0.5s;"></div>
+        <div class="node"><i class="fas fa-server"></i><br>K3d Cluster</div>
+    </div>
+
+    <h2>2. Processus Technique</h2>
+    <h3>A. Build Immuable (Packer)</h3>
+    <p>Plutôt que de configurer un serveur à la main, nous utilisons <strong>Packer</strong> pour créer une image Docker "prête à l'emploi". On injecte notre <code>index.html</code> directement dans le moule de l'image Nginx.</p>
+    <pre>packer build image.pkr.hcl</pre>
+
+    <h3>B. Orchestration (Ansible)</h3>
+    <p><strong>Ansible</strong> agit ici comme le pilote. Il communique avec l'API Kubernetes pour déclarer l'état souhaité :
+    <ul>
+        <li><strong>Deployment</strong> : Assure que 2 réplicas de notre application tournent en permanence.</li>
+        <li><strong>Service</strong> : Expose l'application via un NodePort pour la rendre accessible.</li>
+    </ul>
+    </p>
+
+    <h2>3. Défis Techniques & Solutions</h2>
+    <blockquote>
+        <strong>Problème rencontré :</strong> Lors de l'exécution d'Ansible, le système Ubuntu bloquait l'installation de la librairie <code>kubernetes</code> (PEP 668).<br>
+        <strong>Solution :</strong> Utilisation du flag <code>--break-system-packages</code> pour forcer l'installation dans l'environnement GitHub Codespaces, permettant à Ansible d'utiliser l'interprète Python système.
+    </blockquote>
+
+    <h2>4. Guide d'utilisation rapide</h2>
+    <p>Pour reproduire ce déploiement, utilisez le <strong>Makefile</strong> inclus :</p>
+    <pre>
+# 1. Préparer l'environnement et le cluster
+make setup
+
+# 2. Builder et importer l'image
+make build
+
+# 3. Déployer sur Kubernetes
+make deploy</pre>
+
+    <footer style="margin-top: 4rem; text-align: center; font-size: 0.9rem; color: #64748b;">
+        <hr>
+        Projet réalisé par <strong>@RahmonexTheOne</strong> dans le cadre de l'atelier DevOps 2026.
+    </footer>
+</div>
+
+<script>
+    // Animation subtile au scroll
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = 1;
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    });
+
+    document.querySelectorAll('h2, .node').forEach(el => {
+        el.style.opacity = 0;
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'all 0.6s ease-out';
+        observer.observe(el);
+    });
+</script>
+
+</body>
+</html>

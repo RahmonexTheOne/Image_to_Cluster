@@ -1,0 +1,49 @@
+- name: Deploy Custom Nginx to K3d
+  hosts: localhost
+  connection: local
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  tasks:
+    - name: Create Nginx Deployment
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: custom-nginx
+            namespace: default
+          spec:
+            replicas: 2
+            selector:
+              matchLabels:
+                app: custom-nginx
+            template:
+              metadata:
+                labels:
+                  app: custom-nginx
+              spec:
+                containers:
+                - name: nginx
+                  image: my-custom-nginx:latest
+                  imagePullPolicy: Never
+                  ports:
+                  - containerPort: 80
+
+    - name: Create Nginx Service
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: custom-nginx-service
+            namespace: default
+          spec:
+            selector:
+              app: custom-nginx
+            ports:
+              - protocol: TCP
+                port: 80
+                targetPort: 80
+            type: NodePort
